@@ -40,6 +40,10 @@ class Battlelog(object):
             return None
         return User(self, user)
 
+    def get_platoon_members(self, id):
+        rv = self.api_request('GET', 'platoon/%s/listmembers' % id)
+        return [User(self, x) for x in rv['context']['listMembers']]
+
 
 class User(object):
 
@@ -52,9 +56,23 @@ class User(object):
         def getter(self):
             node = self.profile_common
             for part in parts:
-                node = node[part]
+                node = node.get(part)
+            if node is None:
+                return None
             return node
         return property(getter)
+
+    @property
+    def profile_url(self):
+        return urlparse.urljoin(self.battlelog.base_url,
+            'user/' + url_quote(self.username))
+
+    def get_avatar_url(self, size=80):
+        return 'http://www.gravatar.com/avatar/%s?s=%s&d=%s' % (
+            self.gravatar,
+            size,
+            'mm'
+        )
 
     username = _accessor('user.username')
     gravatar = _accessor('user.gravatarMd5')
@@ -65,6 +83,26 @@ class User(object):
     location = _accessor('userinfo.location')
     age = _accessor('userinfo.age')
     name = _accessor('userinfo.name')
+    is_online = _accessor('user.presence.isOnline')
+    is_playing = _accessor('user.presence.isPlaying')
+    server_guid = _accessor('user.presence.serverGuid')
+    server_name = _accessor('user.presence.serverName')
+
+    @property
+    def is_playing(self):
+        rv = False
+        try:
+            self.profile_common['user']['presence']['serverGuid']
+            rv = self.profile_common['user']['presence']['isPlaying']
+        except KeyError:
+            pass
+        return rv
+
+    @property
+    def server_url(self):
+        return urlparse.urljoin(self.battlelog.base_url,
+            'servers/show/%s/%s/' % (url_quote(self.server_guid),
+                                     url_quote(self.server_name)))
 
     def __repr__(self):
         return '<User "%s" (%s)>' % (self.username, self.user_id)
