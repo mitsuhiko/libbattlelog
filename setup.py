@@ -8,7 +8,7 @@ setup(
     name='libbattlelog',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
-    version='0.1',
+    version='0.2',
     url='http://github.com/mitsuhiko/libbattlelog',
     py_modules=['libbattlelog'],
     description='Accesses the Battlefield 3 Battlelog',

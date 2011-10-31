@@ -101,8 +101,7 @@ class User(object):
     @property
     def server_url(self):
         return urlparse.urljoin(self.battlelog.base_url,
-            'servers/show/%s/%s/' % (url_quote(self.server_guid),
-                                     url_quote(self.server_name)))
+            'servers/show/%s/' % url_quote(self.server_guid))
 
     def __repr__(self):
         return '<User "%s" (%s)>' % (self.username, self.user_id)
